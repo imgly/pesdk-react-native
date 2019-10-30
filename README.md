@@ -2,7 +2,7 @@
   <img src="http://static.photoeditorsdk.com/logo.png" alt="PhotoEditor SDK Logo"/>
 </p>
 
-# React Native module for the PhotoEditor SDK
+# React Native module for PhotoEditor SDK
 
 ## Getting started
 
@@ -22,7 +22,7 @@ Import the module in your `App.js`:
 import {Configuration, PESDK} from 'react-native-photoeditorsdk';
 ```
 
-Unlock the VideoEditor SDK with a license file:
+Unlock VideoEditor SDK with a license file:
 
 ```js
 PESDK.unlockWithLicense(require('./pesdk_license'));
@@ -38,7 +38,7 @@ Please see the [code documentation](./index.d.ts) for more details and additiona
 
 ## License Terms
 
-Make sure you have a commercial license for the PhotoEditor SDK before releasing your app.
+Make sure you have a commercial license for PhotoEditor SDK before releasing your app.
 A commercial license is required for any app or service that has any form of monetization: This includes free apps with in-app purchases or ad supported applications. Please contact us if you want to purchase the commercial license.
 
 ## Support and License

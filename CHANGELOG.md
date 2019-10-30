@@ -2,4 +2,4 @@
 
 ### Added
 
-* Initial release of the React Native module for the PhotoEditor SDK. This version adds support for iOS only. Android support will be added in a later release.
+* Initial release of the React Native module for PhotoEditor SDK. This version adds support for iOS only. Android support will be added in a later release.
