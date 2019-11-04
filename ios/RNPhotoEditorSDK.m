@@ -26,9 +26,9 @@ RCT_EXPORT_MODULE();
     if (serializationData != nil) {
       PESDKDeserializationResult *deserializationResult = nil;
       if (photoAsset != nil) {
-        deserializationResult = [PESDKDeserializer deserializeWithData:serializationData imageDimensions:photoAsset.size];
+        deserializationResult = [PESDKDeserializer deserializeWithData:serializationData imageDimensions:photoAsset.size assetCatalog:configuration.assetCatalog];
       } else {
-        deserializationResult = [PESDKDeserializer deserializeWithData:serializationData];
+        deserializationResult = [PESDKDeserializer deserializeWithData:serializationData assetCatalog:configuration.assetCatalog];
         if (deserializationResult.photo == nil) {
           reject(kErrorUnableToLoad, @"No image to load. Image request and deserialized image are null", nil);
           return nil;
