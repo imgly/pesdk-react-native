@@ -2,14 +2,15 @@ import {NativeModules, Image} from 'react-native';
 import {createDefaultConfiguration, Configuration} from './configuration';
 
 const {RNPhotoEditorSDK} = NativeModules;
+export default RNPhotoEditorSDK;
 
 function resolveStaticAsset(assetSource, extractURI = true) {
   const resolvedSource = Image.resolveAssetSource(assetSource);
   const source = (resolvedSource != null) ? resolvedSource : assetSource;
   if (extractURI) {
-    return (source.uri != null) ? source.uri : source;
+    return (source == null) ? null : ((source.uri != null) ? source.uri : source);
   }
-  return source
+  return source 
 }
 
 function getNestedObject(nestedObject, pathArray) {
@@ -108,9 +109,14 @@ class PESDK {
    */
   static openEditor(imageSource, configuration = null, serialization = null) {
     resolveStaticAssets(configuration)
-    const image = resolveStaticAsset(imageSource, false);
-    return RNPhotoEditorSDK.present(image, configuration, serialization);
+    const image = resolveStaticAsset(imageSource, Platform.OS == 'android');
+    if (Platform.OS == 'android') {
+      return RNPhotoEditorSDK.present(image, configuration, serialization != null ? JSON.stringify(serialization) : null);
+    } else {
+      return RNPhotoEditorSDK.present(image, configuration, serialization);
+    }
   }
+  
 
   /**
    * Unlock PhotoEditor SDK with a license.
@@ -123,7 +129,11 @@ class PESDK {
    * resolved by the packager.
    */
   static unlockWithLicense(license) {
-    RNPhotoEditorSDK.unlockWithLicense(license);
+    if (Platform.OS == 'android') {
+      RNPhotoEditorSDK.unlockWithLicense(JSON.stringify(license));
+    } else {
+      RNPhotoEditorSDK.unlockWithLicense(license);
+    }
   }
 
   /**
