@@ -104,7 +104,8 @@ class PESDK {
    * @return {Promise<{image: string, hasChanges: boolean, serialization: object}>} Returns the
    * edited `image`, an indicator (`hasChanges`) whether the input image was modified at all, and
    * all modifications (`serialization`) applied to the input image if `export.serialization.enabled`
-   * of the `configuration` was set.
+   * of the `configuration` was set. If the editor is dismissed without exporting the edited image
+   * `null` is returned instead.
    */
   static openEditor(imageSource, configuration = null, serialization = null) {
     resolveStaticAssets(configuration)

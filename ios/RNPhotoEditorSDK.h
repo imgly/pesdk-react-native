@@ -1,6 +1,6 @@
 #import <React/RCTBridgeModule.h>
 #import "RNImglyKit.h"
 
-@interface RNPhotoEditorSDK : RNPESDKImglyKit <RCTBridgeModule>
+@interface RNPhotoEditorSDK : RN_IMGLY_ImglyKit <RCTBridgeModule>
 
 @end

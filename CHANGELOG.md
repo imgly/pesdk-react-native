@@ -1,3 +1,10 @@
+## [2.1.1]
+
+### Fixed
+
+* [iOS] Fixed duplicate symbols for constants when using PhotoEditor SDK and VideoEditor SDK in the same project.
+* [iOS] Fixed return `null` if the editor is dismissed without exporting the edited image.
+
 ## [2.1.0]
 
 ### Changed

@@ -30,7 +30,7 @@ RCT_EXPORT_MODULE();
       } else {
         deserializationResult = [PESDKDeserializer deserializeWithData:serializationData assetCatalog:configuration.assetCatalog];
         if (deserializationResult.photo == nil) {
-          reject(kErrorUnableToLoad, @"No image to load. Image request and deserialized image are null", nil);
+          reject(RN_IMGLY.kErrorUnableToLoad, @"No image to load. Image request and deserialized image are null", nil);
           return nil;
         }
         photoAsset = [PESDKPhoto photoFromPhotoRepresentation:deserializationResult.photo];
@@ -92,13 +92,13 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
 {
   if (request == nil) {
     if (state == nil) {
-      reject(kErrorUnableToLoad, @"No image to load. Image request and serialization state are null", nil);
+      reject(RN_IMGLY.kErrorUnableToLoad, @"No image to load. Image request and serialization state are null", nil);
       return;
     }
     [self present:nil withConfiguration:configuration andSerialization:state resolve:resolve reject:reject];
   } else if (request.URL.isFileURL) {
     if (![[NSFileManager defaultManager] fileExistsAtPath:request.URL.path]) {
-      reject(kErrorUnableToLoad, @"File does not exist", nil);
+      reject(RN_IMGLY.kErrorUnableToLoad, @"File does not exist", nil);
       return;
     }
     PESDKPhoto *photo = [[PESDKPhoto alloc] initWithURL:request.URL];
@@ -106,11 +106,11 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
   } else {
     [self.bridge.imageLoader loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
       if (error) {
-        reject(kErrorUnableToLoad, [NSString imgly_string:@"Unable to load image." withError:error], error);
+        reject(RN_IMGLY.kErrorUnableToLoad, [NSString RN_IMGLY_string:@"Unable to load image." withError:error], error);
         return;
       }
       if (image == nil) {
-        reject(kErrorUnableToLoad, @"Image is null", nil);
+        reject(RN_IMGLY.kErrorUnableToLoad, @"Image is null", nil);
         return;
       }
       PESDKPhoto *photo = [[PESDKPhoto alloc] initWithImage:image];
@@ -143,11 +143,11 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
   id serialization = nil;
 
   if (imageData.length != 0) {
-    if ([self.exportType isEqualToString:kExportTypeFileURL]) {
-      if ([imageData imgly_writeToURL:self.exportFile andCreateDirectoryIfNecessary:YES error:&error]) {
+    if ([self.exportType isEqualToString:RN_IMGLY.kExportTypeFileURL]) {
+      if ([imageData RN_IMGLY_writeToURL:self.exportFile andCreateDirectoryIfNecessary:YES error:&error]) {
         image = self.exportFile.absoluteString;
       }
-    } else if ([self.exportType isEqualToString:kExportTypeDataURL]) {
+    } else if ([self.exportType isEqualToString:RN_IMGLY.kExportTypeDataURL]) {
       NSString *mediaType = CFBridgingRelease(UTTypeCopyPreferredTagWithClass(photoEditViewControllerOptions.outputImageFileFormatUTI, kUTTagClassMIMEType));
       image = [NSString stringWithFormat:@"data:%@;base64,%@", mediaType, [imageData base64EncodedStringWithOptions: 0]];
     }
@@ -156,32 +156,40 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
   if (self.serializationEnabled)
   {
     NSData *serializationData = [photoEditViewController serializedSettingsWithImageData:self.serializationEmbedImage];
-    if ([self.serializationType isEqualToString:kExportTypeFileURL]) {
-      if ([serializationData imgly_writeToURL:self.serializationFile andCreateDirectoryIfNecessary:YES error:&error]) {
+    if ([self.serializationType isEqualToString:RN_IMGLY.kExportTypeFileURL]) {
+      if ([serializationData RN_IMGLY_writeToURL:self.serializationFile andCreateDirectoryIfNecessary:YES error:&error]) {
         serialization = self.serializationFile.absoluteString;
       }
-    } else if ([self.serializationType isEqualToString:kExportTypeObject]) {
+    } else if ([self.serializationType isEqualToString:RN_IMGLY.kExportTypeObject]) {
       serialization = [NSJSONSerialization JSONObjectWithData:serializationData options:kNilOptions error:&error];
     }
   }
 
-  if (error == nil) {
-    self.resolve(@{ @"image": (image != nil) ? image : [NSNull null],
-                    @"hasChanges": @(photoEditViewController.hasChanges),
-                    @"serialization": (serialization != nil) ? serialization : [NSNull null] });
-  } else {
-    self.reject(kErrorUnableToExport, [NSString imgly_string:@"Unable to export image or serialization." withError:error], error);
-  }
-  [self dismiss:photoEditViewController animated:YES];
+  RCTPromiseResolveBlock resolve = self.resolve;
+  RCTPromiseRejectBlock reject = self.reject;
+  [self dismiss:photoEditViewController animated:YES completion:^{
+    if (error == nil) {
+      resolve(@{ @"image": (image != nil) ? image : [NSNull null],
+                 @"hasChanges": @(photoEditViewController.hasChanges),
+                 @"serialization": (serialization != nil) ? serialization : [NSNull null] });
+    } else {
+      reject(RN_IMGLY.kErrorUnableToExport, [NSString RN_IMGLY_string:@"Unable to export image or serialization." withError:error], error);
+    }
+  }];
 }
 
 - (void)photoEditViewControllerDidCancel:(nonnull PESDKPhotoEditViewController *)photoEditViewController {
-  [self dismiss:photoEditViewController animated:YES];
+  RCTPromiseResolveBlock resolve = self.resolve;
+  [self dismiss:photoEditViewController animated:YES completion:^{
+    resolve([NSNull null]);
+  }];
 }
 
 - (void)photoEditViewControllerDidFailToGeneratePhoto:(nonnull PESDKPhotoEditViewController *)photoEditViewController {
-  self.reject(kErrorUnableToExport, @"Unable to generate image", nil);
-  [self dismiss:photoEditViewController animated:YES];
+  RCTPromiseRejectBlock reject = self.reject;
+  [self dismiss:photoEditViewController animated:YES completion:^{
+    reject(RN_IMGLY.kErrorUnableToExport, @"Unable to generate image", nil);
+  }];
 }
 
 @end
