@@ -158,7 +158,7 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
         }
     }
 
-    private fun checkPermissions() : Boolean {
+    private fun checkPermissions(): Boolean {
         (currentActivity as? PermissionAwareActivity)?.also {
             var haveAllPermissions = true
             for (permission in PermissionRequest.NEEDED_EDITOR_PERMISSIONS) {
@@ -206,9 +206,9 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
     operator fun WritableMap.set(id: String, value: String?) = this.putString(id, value)
     operator fun WritableMap.set(id: String, value: Double) = this.putDouble(id, value)
     operator fun WritableMap.set(id: String, value: Float) = this.putDouble(id, value.toDouble())
-    operator fun WritableMap.set(id: String, value: ReadableArray?) = this.putArray(id, value)
+    operator fun WritableMap.set(id: String, value: WritableArray?) = this.putArray(id, value)
     operator fun WritableMap.set(id: String, value: Int) = this.putInt(id, value)
-    operator fun WritableMap.set(id: String, value: ReadableMap?) = this.putMap(id, value)
+    operator fun WritableMap.set(id: String, value: WritableMap?) = this.putMap(id, value)
 
     fun reactMap(vararg pairs: Pair<String, Any?>): WritableMap {
         val map = Arguments.createMap()
@@ -221,8 +221,8 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                 is Double -> map[id] = value
                 is Float -> map[id] = value
                 is Int -> map[id] = value
-                is ReadableMap? -> map[id] = value
-                is ReadableArray? -> map[id] = value
+                is WritableMap? -> map[id] = value
+                is WritableArray? -> map[id] = value
                 else -> if (value == null) {
                     map.putNull(id)
                 } else {
