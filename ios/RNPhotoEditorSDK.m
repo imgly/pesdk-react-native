@@ -1,9 +1,8 @@
 #import "RNPhotoEditorSDK.h"
+#import "RNImglyKit.h"
 #import "RNImglyKitSubclass.h"
 
 #import <React/RCTImageLoader.h>
-
-@import PhotoEditorSDK;
 
 @interface RNPhotoEditorSDK () <PESDKPhotoEditViewControllerDelegate>
 
@@ -12,6 +11,24 @@
 @implementation RNPhotoEditorSDK
 
 RCT_EXPORT_MODULE();
+
++ (RNPESDKConfigurationBlock)configureWithBuilder {
+  return RN_IMGLY_ImglyKit.configureWithBuilder;
+}
+
++ (void)setConfigureWithBuilder:(RNPESDKConfigurationBlock)configurationBlock {
+  RN_IMGLY_ImglyKit.configureWithBuilder = configurationBlock;
+}
+
+static RNPESDKWillPresentBlock _willPresentPhotoEditViewController = nil;
+
++ (RNPESDKWillPresentBlock)willPresentPhotoEditViewController {
+  return _willPresentPhotoEditViewController;
+}
+
++ (void)setWillPresentPhotoEditViewController:(RNPESDKWillPresentBlock)willPresentBlock {
+  _willPresentPhotoEditViewController = willPresentBlock;
+}
 
 @synthesize bridge = _bridge;
 
@@ -43,6 +60,10 @@ RCT_EXPORT_MODULE();
                                                                                                       photoEditModel:photoEditModel];
     photoEditViewController.modalPresentationStyle = UIModalPresentationFullScreen;
     photoEditViewController.delegate = self;
+    RNPESDKWillPresentBlock willPresentPhotoEditViewController = RNPhotoEditorSDK.willPresentPhotoEditViewController;
+    if (willPresentPhotoEditViewController != nil) {
+      willPresentPhotoEditViewController(photoEditViewController);
+    }
     return photoEditViewController;
 
   } withUTI:^CFStringRef _Nonnull(PESDKConfiguration * _Nonnull configuration) {
