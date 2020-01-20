@@ -35,7 +35,7 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
 
     companion object {
         // This number must be unique. It is public to allow client code to change it if the same value is used elsewhere.
-        var EDITOR_RESULT_ID = 489313435
+        var EDITOR_RESULT_ID = 29064
     }
 
     init {
