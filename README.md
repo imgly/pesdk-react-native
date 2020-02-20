@@ -7,6 +7,9 @@
   <a href="https://npmjs.org/package/react-native-photoeditorsdk">
     <img src="https://img.shields.io/npm/v/react-native-photoeditorsdk.svg" alt="NPM version">
   </a>
+  <a href="https://npmjs.org/package/react-native-photoeditorsdk">
+    <img src="https://img.shields.io/badge/platforms-android%20|%20ios-lightgrey.svg" alt="Platform support">
+  </a>
   <a href="http://twitter.com/PhotoEditorSDK">
     <img src="https://img.shields.io/badge/twitter-@PhotoEditorSDK-blue.svg?style=flat" alt="Twitter">
   </a>
@@ -118,7 +121,7 @@ yarn react-native link
 Import the module in your `App.js`:
 
 ```js
-import {PESDK, Configuration} from 'react-native-photoeditorsdk';
+import {PESDK, PhotoEditorModal, Configuration} from 'react-native-photoeditorsdk';
 ```
 
 Unlock PhotoEditor SDK with a license file:
@@ -131,6 +134,12 @@ Open the editor with an image:
 
 ```js
 PESDK.openEditor(require('./image.jpg'));
+```
+
+Or use the component to open the editor:
+
+```jsx
+<PhotoEditorModal visible={true} image={require('./image.jpg')}/>
 ```
 
 Please see the [code documentation](./index.d.ts) for more details and additional [customization and configuration options](./configuration.ts).

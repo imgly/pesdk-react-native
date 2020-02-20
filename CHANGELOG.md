@@ -1,3 +1,9 @@
+## [2.3.0]
+
+### Added
+
+* Added `PhotoEditorModal` component that can be used instead of the `PESDK.openEditor` function to modally present a photo editor.
+
 ## [2.2.2]
 
 ### Fixed

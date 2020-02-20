@@ -1,4 +1,5 @@
-import {Configuration} from './configuration';
+import { Component } from 'react';
+import { Configuration } from './configuration';
 
 declare class PESDK {
   /**
@@ -6,10 +7,11 @@ declare class PESDK {
    * @note EXIF meta data is only preserved in the edited image if and only if the source
    * image is loaded from a local `file://` resource.
    *
-   * @param {string | {uri: string} | number} imageSource The source of the image to be edited.
+   * @param {string | {uri: string} | number} image The source of the image to be edited.
    * Can be either an URI (local, remote, data resource, or any other registered scheme for the
    * React Native image loader), an object with a member `uri`, or an asset reference which can
-   * be optained by, e.g., `require('./image.png')` as `number`.
+   * be optained by, e.g., `require('./image.png')` as `number`. If this parameter is `null`,
+   * the `serialization` parameter must not be `null` and it must contain an embedded source image.
    * @param {Configuration} configuration The configuration used to initialize the editor.
    * @param {object} serialization The serialization used to initialize the editor. This
    * restores a previous state of the editor by re-applying all modifications to the loaded
@@ -22,7 +24,7 @@ declare class PESDK {
    * `null` is returned instead.
    */
   static openEditor(
-    imageSource: string | {uri: string} | number,
+    image: string | {uri: string} | number,
     configuration: Configuration,
     serialization: object
   ): Promise<{image: string, hasChanges: boolean, serialization: object}>
@@ -49,5 +51,76 @@ declare class PESDK {
   ): Configuration
 }
 
-export {PESDK};
+/**
+ * Props for the `PhotoEditorModal` component.
+ */
+interface PhotoEditorModalProps {
+  /**
+   * This prop determines whether your modal is visible.
+   */
+  visible: boolean;
+
+  /**
+   * This prop determines the source of the image to be edited.
+   * Can be either an URI (local, remote, data resource, or any other registered scheme for the
+   * React Native image loader), an object with a member `uri`, or an asset reference which can
+   * be optained by, e.g., `require('./image.png')` as `number`.
+   *
+   * If this prop is `null`, the `serialization` prop must not be `null` and it must contain an
+   * embedded source image.
+   *
+   * @note EXIF meta data is only preserved in the edited image if and only if the source
+   * image is loaded from a local `file://` resource.
+   */
+  image?: string | {uri: string} | number;
+
+  /**
+   * This prop determines the configuration used to initialize the editor.
+   */
+  configuration?: Configuration;
+
+  /**
+   * This prop determines the serialization used to initialize the editor. This
+   * restores a previous state of the editor by re-applying all modifications to the loaded
+   * image.
+   */
+  serialization?: object;
+
+  /**
+   * This prop determines the callback function that will be called when the user exported an image.
+   *
+   * The object passed to this callback includes the edited `image`, an indicator (`hasChanges`) whether
+   * the input image was modified at all, and all modifications (`serialization`) applied to the input image
+   * if `export.serialization.enabled` of the `configuration` prop was set.
+   */
+  onExport: ({image: string, hasChanges: boolean, serialization: object}) => void;
+
+  /**
+   * This prop determines the callback function that will be called when the user dissmisses the editor without
+   * exporting an image.
+   */
+  onCancel?: () => void;
+
+  /**
+   * This prop determines the callback function that will be called when an error occurs.
+   */
+  onError?: (error: Error) => void;
+}
+
+/**
+ * State for the `PhotoEditorModal` component.
+ */
+interface PhotoEditorModalState {
+  /**
+   * This state determines whether the modal is visible.
+   */
+  visible: boolean;
+}
+
+/**
+ * A component that wraps the `PESDK.openEditor` function to modally present a photo editor.
+ */
+declare class PhotoEditorModal extends Component<PhotoEditorModalProps, PhotoEditorModalState> {}
+
+export { PESDK, PhotoEditorModal };
 export * from './configuration';

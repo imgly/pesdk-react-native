@@ -1,7 +1,8 @@
-import {NativeModules, Image, Platform} from 'react-native';
-import {createDefaultConfiguration, Configuration} from './configuration';
+import { Component } from 'react';
+import { NativeModules, Image, Platform } from 'react-native';
+import { Configuration, createDefaultConfiguration } from './configuration';
 
-const {RNPhotoEditorSDK} = NativeModules;
+const { RNPhotoEditorSDK } = NativeModules;
 
 function resolveStaticAsset(assetSource, extractURI = true) {
   const resolvedSource = Image.resolveAssetSource(assetSource);
@@ -92,10 +93,11 @@ class PESDK {
    * @note EXIF meta data is only preserved in the edited image if and only if the source
    * image is loaded from a local `file://` resource.
    *
-   * @param {string | {uri: string} | number} imageSource The source of the image to be edited.
+   * @param {string | {uri: string} | number} image The source of the image to be edited.
    * Can be either an URI (local, remote, data resource, or any other registered scheme for the
    * React Native image loader), an object with a member `uri`, or an asset reference which can
-   * be optained by, e.g., `require('./image.png')` as `number`.
+   * be optained by, e.g., `require('./image.png')` as `number`. If this parameter is `null`,
+   * the `serialization` parameter must not be `null` and it must contain an embedded source image.
    * @param {Configuration} configuration The configuration used to initialize the editor.
    * @param {object} serialization The serialization used to initialize the editor. This
    * restores a previous state of the editor by re-applying all modifications to the loaded
@@ -107,13 +109,13 @@ class PESDK {
    * of the `configuration` was set. If the editor is dismissed without exporting the edited image
    * `null` is returned instead.
    */
-  static openEditor(imageSource, configuration = null, serialization = null) {
+  static openEditor(image = null, configuration = null, serialization = null) {
     resolveStaticAssets(configuration)
-    const image = resolveStaticAsset(imageSource, Platform.OS == 'android');
+    const source = resolveStaticAsset(image, Platform.OS == 'android');
     if (Platform.OS == 'android') {
-      return RNPhotoEditorSDK.present(image, configuration, serialization != null ? JSON.stringify(serialization) : null);
+      return RNPhotoEditorSDK.present(source, configuration, serialization != null ? JSON.stringify(serialization) : null);
     } else {
-      return RNPhotoEditorSDK.present(image, configuration, serialization);
+      return RNPhotoEditorSDK.present(source, configuration, serialization);
     }
   }
 
@@ -144,5 +146,36 @@ class PESDK {
   }
 }
 
-export {PESDK};
+class PhotoEditorModal extends Component {
+  state = {
+    visible: false
+  }
+
+  static getDerivedStateFromProps = (props, state) => {
+    const { image, configuration, serialization, onExport, onCancel, onError } = props;
+    if (props.visible  && !state.visible) {
+      PESDK.openEditor(image, configuration, serialization).then(result => {
+        if (result !== null) {
+          onExport(result);
+        } else {
+          if (onCancel) {
+            onCancel();
+          }
+        }
+      }).catch((error) => {
+        if (onError) {
+          onError(error);
+        }
+      });
+    }
+
+    return ({ visible: props.visible })
+  }
+
+  render() {
+    return null;
+  }
+}
+
+export { PESDK, PhotoEditorModal };
 export * from './configuration';
