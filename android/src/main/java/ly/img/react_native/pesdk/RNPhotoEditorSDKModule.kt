@@ -145,7 +145,7 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                     if (potentialFile?.exists() == true) {
                         loadSettings.setSource(Uri.fromFile(potentialFile), deleteProtectedSource = true)
                     } else {
-                        loadSettings.setSource(Uri.parse(it), deleteProtectedSource = true)
+                        loadSettings.setSource(ConfigLoader.parseUri(it), deleteProtectedSource = true)
                     }
                 }
             }
