@@ -1,3 +1,9 @@
+## [2.4.1]
+
+### Fixed
+
+* [Android] Fixed wrong behavior of `ImageExportType` where `DATA_URL` and `FILE_URL` were swapped.
+
 ## [2.4.0]
 
 ### Changed

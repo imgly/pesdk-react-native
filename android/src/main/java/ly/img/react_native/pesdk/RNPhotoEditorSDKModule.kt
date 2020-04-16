@@ -102,11 +102,11 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                             currentPromise?.resolve(
                               reactMap(
                                 "image" to when (currentConfig?.export?.image?.exportType) {
-                                    ImageExportType.FILE_URL -> resultPath?.let {
+                                    ImageExportType.DATA_URL -> resultPath?.let {
                                         val imageSource = ImageSource.create(it)
                                         "data:${imageSource.imageFormat.mimeType};base64,${imageSource.asBase64}"
                                     }
-                                    ImageExportType.DATA_URL -> resultPath?.toString()
+                                    ImageExportType.FILE_URL -> resultPath?.toString()
                                     else -> resultPath?.toString()
                                 },
                                 "hasChanges" to (sourcePath?.path != resultPath?.path),
