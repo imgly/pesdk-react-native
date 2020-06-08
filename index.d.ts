@@ -1,6 +1,18 @@
 import { Component } from 'react';
 import { Configuration } from './configuration';
 
+/**
+ * The result of an export.
+ */
+interface PhotoEditorResult {
+  /** The edited image. */
+  image: string;
+  /** An indicator whether the input image was modified at all. */
+  hasChanges: boolean;
+  /** All modifications applied to the input image if `export.serialization.enabled` of the `Configuration` was set to `true`. */
+  serialization?: string | object;
+}
+
 declare class PESDK {
   /**
    * Modally present a photo editor.
@@ -17,17 +29,14 @@ declare class PESDK {
    * restores a previous state of the editor by re-applying all modifications to the loaded
    * image.
    *
-   * @return {Promise<{image: string, hasChanges: boolean, serialization: object}>} Returns the
-   * edited `image`, an indicator (`hasChanges`) whether the input image was modified at all, and
-   * all modifications (`serialization`) applied to the input image if `export.serialization.enabled`
-   * of the `configuration` was set. If the editor is dismissed without exporting the edited image
-   * `null` is returned instead.
+   * @return {Promise<PhotoEditorResult>} Returns a `PhotoEditorResult` or `null` if the editor
+   * is dismissed without exporting the edited image.
    */
   static openEditor(
     image: string | {uri: string} | number,
-    configuration: Configuration,
-    serialization: object
-  ): Promise<{image: string, hasChanges: boolean, serialization: object}>
+    configuration?: Configuration,
+    serialization?: object
+  ): Promise<PhotoEditorResult>
 
   /**
    * Unlock PhotoEditor SDK with a license.
@@ -88,15 +97,11 @@ interface PhotoEditorModalProps {
 
   /**
    * This prop determines the callback function that will be called when the user exported an image.
-   *
-   * The object passed to this callback includes the edited `image`, an indicator (`hasChanges`) whether
-   * the input image was modified at all, and all modifications (`serialization`) applied to the input image
-   * if `export.serialization.enabled` of the `configuration` prop was set.
    */
-  onExport: ({image: string, hasChanges: boolean, serialization: object}) => void;
+  onExport: (args: PhotoEditorResult) => void;
 
   /**
-   * This prop determines the callback function that will be called when the user dissmisses the editor without
+   * This prop determines the callback function that will be called when the user dismisses the editor without
    * exporting an image.
    */
   onCancel?: () => void;

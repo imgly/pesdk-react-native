@@ -1,3 +1,9 @@
+## [2.4.2]
+
+### Fixed
+
+* [Android] Fixed serialization export file URL to include the schema.
+
 ## [2.4.1]
 
 ### Fixed

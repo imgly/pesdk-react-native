@@ -80,7 +80,7 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                                                 val file = serializationConfig.filename?.let { Export.convertPathToFile(it) }
                                                   ?: File.createTempFile("serialization", ".json")
                                                 PESDKFileWriter(settingsList).writeJson(file)
-                                                file.absolutePath
+                                                Uri.fromFile(file).toString()
                                             }
                                             SerializationExportType.OBJECT -> {
                                                 ReactJSON.convertJsonToMap(
