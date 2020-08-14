@@ -83,11 +83,11 @@ For older React Native versions autolinking is not available and PhotoEditor SDK
        }
        dependencies {
            classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.61"
-           classpath 'ly.img.android.sdk:plugin:7.2.5'
+           classpath 'ly.img.android.sdk:plugin:7.6.0'
        }
    }
    ```
-   In order to update PhotoEditor SDK for Android replace the version string `7.2.5` with a [newer release](https://github.com/imgly/pesdk-android-demo/releases).
+   In order to update PhotoEditor SDK for Android replace the version string `7.6.0` with a [newer release](https://github.com/imgly/pesdk-android-demo/releases).
 
 3. Configure PhotoEditor SDK for Android by opening the `android/app/build.gradle` file  (**not** `android/build.gradle`) and adding the following lines under `apply plugin: "com.android.application"`:
    ```groovy
@@ -118,6 +118,8 @@ For older React Native versions autolinking is not available and PhotoEditor SDK
            include 'assets:overlay-basic'
            include 'assets:sticker-shapes'
            include 'assets:sticker-emoticons'
+
+           include 'backend:sticker-smart'
        }
    }
    ```
@@ -130,7 +132,7 @@ Import the module in your `App.js`:
 import {PESDK, PhotoEditorModal, Configuration} from 'react-native-photoeditorsdk';
 ```
 
-Unlock PhotoEditor SDK with a license file:
+Each platform requires a separate license file. [Unlock PhotoEditor SDK](./index.d.ts#L41-L53) with a single line of code for both platforms via [platform-specific file extensions](https://reactnative.dev/docs/platform-specific-code#platform-specific-extensions):
 
 ```js
 PESDK.unlockWithLicense(require('./pesdk_license'));
