@@ -23,12 +23,14 @@ import ly.img.android.pesdk.utils.MainThreadRunnable
 import ly.img.android.pesdk.utils.SequenceRunnable
 import ly.img.android.pesdk.utils.UriHelper
 import ly.img.android.sdk.config.*
-import ly.img.android.serializer._3._0._0.PESDKFileReader
-import ly.img.android.serializer._3._0._0.PESDKFileWriter
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
+import ly.img.android.pesdk.backend.encoder.Encoder
+import ly.img.android.serializer._3.IMGLYFileReader
+import ly.img.android.serializer._3.IMGLYFileWriter
+
 
 
 class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), ActivityEventListener, PermissionListener {
@@ -77,15 +79,18 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                                         }
                                         when (serializationConfig.exportType) {
                                             SerializationExportType.FILE_URL -> {
-                                                val file = serializationConfig.filename?.let { Export.convertPathToFile(it) }
-                                                  ?: File.createTempFile("serialization", ".json")
-                                                PESDKFileWriter(settingsList).writeJson(file)
-                                                Uri.fromFile(file).toString()
+                                                val uri = serializationConfig.filename?.let { 
+                                                    Uri.parse(it)
+                                                } ?: Uri.fromFile(File.createTempFile("serialization", ".json"))
+                                                Encoder.createOutputStream(uri).use { outputStream -> 
+                                                    IMGLYFileWriter(settingsList).writeJson(outputStream);
+                                                }
+                                                uri.toString()
                                             }
                                             SerializationExportType.OBJECT -> {
                                                 ReactJSON.convertJsonToMap(
                                                   JSONObject(
-                                                    PESDKFileWriter(settingsList).writeJsonAsString()
+                                                    IMGLYFileWriter(settingsList).writeJsonAsString()
                                                   )
                                                 ) as Any?
                                             }
@@ -139,18 +144,16 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
         settingsList.configure<LoadSettings> { loadSettings ->
             image?.also {
                 if (it.startsWith("data:")) {
-                    loadSettings.setSource(UriHelper.createFromBase64String(it.substringAfter("base64,")), deleteProtectedSource = false)
+                    loadSettings.source = UriHelper.createFromBase64String(it.substringAfter("base64,"))
                 } else {
                     val potentialFile = continueWithExceptions { File(it) }
                     if (potentialFile?.exists() == true) {
-                        loadSettings.setSource(Uri.fromFile(potentialFile), deleteProtectedSource = true)
+                        loadSettings.source = Uri.fromFile(potentialFile)
                     } else {
-                        loadSettings.setSource(ConfigLoader.parseUri(it), deleteProtectedSource = true)
+                        loadSettings.source = ConfigLoader.parseUri(it)
                     }
                 }
             }
-        }.configure<SaveSettings> {
-            it.savePolicy = SaveSettings.SavePolicy.RETURN_SOURCE_OR_CREATE_OUTPUT_IF_NECESSARY
         }
 
         readSerialisation(settingsList, serialization, image == null)
@@ -180,7 +183,7 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
     private fun readSerialisation(settingsList: SettingsList, serialization: String?, readImage: Boolean) {
         if (serialization != null) {
             skipIfNotExists {
-                PESDKFileReader(settingsList).also {
+                IMGLYFileReader(settingsList).also {
                     it.readJson(serialization, readImage)
                 }
             }
@@ -188,6 +191,7 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
     }
 
     private fun startEditor(settingsList: PhotoEditorSettingsList?) {
+        val currentActivity = this.currentActivity ?: throw RuntimeException("Can't start the Editor because there is no current activity")
         if (settingsList != null) {
             (currentActivity as? PermissionAwareActivity)?.also {
                 for (permission in PermissionRequest.NEEDED_EDITOR_PERMISSIONS) {
