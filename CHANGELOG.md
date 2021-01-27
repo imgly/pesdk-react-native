@@ -1,12 +1,15 @@
+## [2.6.1]
+
+### Changed
+
+* [Android] Raised minimum PhotoEditor SDK for Android version to 8.0.8.
+
 ## [2.6.0]
 
-### Fixed
+### Changed
 
-* Support for Android version 8.0.4 upwards.
-
-## Changed
-
-* Minimal version 8.0.4.
+* [Android] Added support for PhotoEditor SDK for Android version 8.0.4 and above.
+* [Android] Raised minimum PhotoEditor SDK for Android version to 8.0.4.
 
 ## [2.5.0]
 
