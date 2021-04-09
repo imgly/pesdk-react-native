@@ -18,5 +18,5 @@ Pod::Spec.new do |s|
 
   s.dependency 'React'
   s.dependency 'React-RCTImage'
-  s.dependency 'PhotoEditorSDK', '~> 10.18'
+  s.dependency 'PhotoEditorSDK', '~> 10.22'
 end

@@ -55,9 +55,7 @@ static RNPESDKWillPresentBlock _willPresentPhotoEditViewController = nil;
       photoEditModel = deserializationResult.model ?: photoEditModel;
     }
 
-    PESDKPhotoEditViewController *photoEditViewController = [[PESDKPhotoEditViewController alloc] initWithPhotoAsset:photoAsset
-                                                                                                       configuration:configuration
-                                                                                                      photoEditModel:photoEditModel];
+    PESDKPhotoEditViewController *photoEditViewController = [PESDKPhotoEditViewController photoEditViewControllerWithPhotoAsset:photoAsset configuration:configuration photoEditModel:photoEditModel];
     photoEditViewController.modalPresentationStyle = UIModalPresentationFullScreen;
     photoEditViewController.delegate = self;
     RNPESDKWillPresentBlock willPresentPhotoEditViewController = RNPhotoEditorSDK.willPresentPhotoEditViewController;
