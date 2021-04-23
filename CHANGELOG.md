@@ -1,3 +1,7 @@
+## [2.7.1]
+
+* Same version as 2.7.0. Bumped version to keep the version consistent with `react-native-videoeditorsdk`.
+
 ## [2.7.0]
 
 ### Changed
