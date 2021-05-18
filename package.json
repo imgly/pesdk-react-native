@@ -1,7 +1,7 @@
 {
   "name": "react-native-photoeditorsdk",
   "title": "React Native module for PhotoEditor SDK",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "A React Native module for PhotoEditor SDK. Integrate the photo editor into your own HTML5, iOS or Android app - in minutes!",
   "main": "index.js",
   "typings": "index.d.ts",
