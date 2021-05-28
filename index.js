@@ -29,6 +29,32 @@ function resolveNestedAsset(nestedObject, pathArray) {
 }
 
 function resolveStaticAssets(configuration) {
+  let videoClipCategories = getNestedObject(configuration, ["composition", "categories"]);
+  if (videoClipCategories) {
+    for (let category of videoClipCategories) {
+      resolveNestedAsset(category, ["thumbnailURI"]);
+      let videoClips = getNestedObject(category, ["items"]);
+      if (videoClips) {
+        for (let videoClip of videoClips) {
+          resolveNestedAsset(videoClip, ["thumbnailURI"]);
+          resolveNestedAsset(videoClip, ["videoURI"]);
+        }
+      }
+    }
+  }
+  let audioClipCategories = getNestedObject(configuration, ["audio", "categories"]);
+  if (audioClipCategories) {
+    for (let category of audioClipCategories) {
+      resolveNestedAsset(category, ["thumbnailURI"]);
+      let audioClips = getNestedObject(category, ["items"]);
+      if (audioClips) {
+        for (let audioClip of audioClips) {
+          resolveNestedAsset(audioClip, ["thumbnailURI"]);
+          resolveNestedAsset(audioClip, ["audioURI"]);
+        }
+      }
+    }
+  }
   let filterCategories = getNestedObject(configuration, ["filter", "categories"]);
   if (filterCategories) {
     for (let category of filterCategories) {
