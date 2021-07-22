@@ -13,10 +13,8 @@ import ly.img.android.PESDK
 import ly.img.android.pesdk.PhotoEditorSettingsList
 import ly.img.android.pesdk.backend.decoder.ImageSource
 import ly.img.android.pesdk.backend.model.state.LoadSettings
-import ly.img.android.pesdk.backend.model.state.SaveSettings
 import ly.img.android.pesdk.backend.model.state.manager.SettingsList
 import ly.img.android.pesdk.kotlin_extension.continueWithExceptions
-import ly.img.android.pesdk.ui.activity.ImgLyIntent
 import ly.img.android.pesdk.ui.activity.PhotoEditorBuilder
 import ly.img.android.pesdk.ui.utils.PermissionRequest
 import ly.img.android.pesdk.utils.MainThreadRunnable
@@ -28,10 +26,9 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
 import ly.img.android.pesdk.backend.encoder.Encoder
+import ly.img.android.pesdk.backend.model.EditorSDKResult
 import ly.img.android.serializer._3.IMGLYFileReader
 import ly.img.android.serializer._3.IMGLYFileWriter
-
-
 
 class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), ActivityEventListener, PermissionListener {
 
@@ -55,8 +52,13 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
         IMGLY.authorize()
     }
 
-    override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, resultData: Intent?) {
-        val data = resultData ?: return // If resultData is null the result is not from us.
+    override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, intent: Intent?) {
+        val data = try {
+          intent?.let { EditorSDKResult(it) }
+        } catch (e: EditorSDKResult.NotAnImglyResultException) {
+          null
+        } ?: return // If data is null the result is not from us.
+
         when (requestCode) {
             EDITOR_RESULT_ID -> {
                 when (resultCode) {
@@ -65,11 +67,11 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                     }
                     Activity.RESULT_OK -> {
                         SequenceRunnable("Export Done") {
-                            val sourcePath = data.getParcelableExtra<Uri>(ImgLyIntent.SOURCE_IMAGE_URI)
-                            val resultPath = data.getParcelableExtra<Uri>(ImgLyIntent.RESULT_IMAGE_URI)
+                            val sourcePath = data.sourceUri
+                            val resultPath = data.resultUri
 
                             val serializationConfig = currentConfig?.export?.serialization
-                            val settingsList = data.getParcelableExtra<SettingsList>(ImgLyIntent.SETTINGS_LIST)
+                            val settingsList = data.settingsList
 
                             val serialization: Any? = if (serializationConfig?.enabled == true) {
                                 skipIfNotExists {
@@ -83,16 +85,16 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                                                     Uri.parse(it)
                                                 } ?: Uri.fromFile(File.createTempFile("serialization", ".json"))
                                                 Encoder.createOutputStream(uri).use { outputStream -> 
-                                                    IMGLYFileWriter(settingsList).writeJson(outputStream);
+                                                    IMGLYFileWriter(settingsList).writeJson(outputStream)
                                                 }
                                                 uri.toString()
                                             }
                                             SerializationExportType.OBJECT -> {
                                                 ReactJSON.convertJsonToMap(
                                                   JSONObject(
-                                                    IMGLYFileWriter(settingsList).writeJsonAsString()
+                                                          IMGLYFileWriter(settingsList).writeJsonAsString()
                                                   )
-                                                ) as Any?
+                                                )
                                             }
                                         }
                                     }

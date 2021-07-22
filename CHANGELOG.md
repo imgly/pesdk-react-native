@@ -1,3 +1,9 @@
+## [2.10.1]
+
+### Fixed
+
+* [Android] Fixed compiling issues with `compileSdkVersion` 30.
+
 ## [2.10.0]
 
 * Same version as 2.9.0. Bumped version to keep the version consistent with `react-native-videoeditorsdk`.
