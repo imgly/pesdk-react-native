@@ -1,3 +1,18 @@
+## [2.11.0]
+
+### Changed
+
+* [Android] 🚨 The img.ly maven repository is no longer automatically added to your project by the plugin. Please refer to the new step 3 in the [getting started](https://github.com/imgly/pesdk-react-native#android) section of the README for instructions on how to add it.
+* [Android] Added support for PhotoEditor SDK for Android version 9.
+
+### Added
+
+* Added `configuration.export.force` which will force the photo to be rendered and exported in the defined output format even if no changes have been applied. Otherwise, the input asset will be passed through and might not match the defined output format.
+
+### Fixed
+
+* [iOS] Fixed `export.image.exportType` configuration option.
+
 ## [2.10.1]
 
 ### Fixed
