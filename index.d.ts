@@ -36,7 +36,7 @@ declare class PESDK {
     image: string | {uri: string} | number,
     configuration?: Configuration,
     serialization?: object
-  ): Promise<PhotoEditorResult>
+  ): Promise<PhotoEditorResult | null>
 
   /**
    * Unlock PhotoEditor SDK with a license.
