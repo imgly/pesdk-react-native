@@ -111,6 +111,10 @@ function resolveStaticAssets(configuration) {
       resolveNestedAsset(frame, ["imageGroups", "bottom", "endURI"]);
     }
   }
+  let watermark = getNestedObject(configuration, ["watermark"]);
+  if (watermark) {
+    resolveNestedAsset(watermark, ["watermarkURI"]);
+  }
 }
 
 class PESDK {

@@ -6,8 +6,6 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import com.facebook.react.bridge.*
-import com.facebook.react.modules.core.PermissionAwareActivity
-import com.facebook.react.modules.core.PermissionListener
 import ly.img.android.IMGLY
 import ly.img.android.PESDK
 import ly.img.android.pesdk.PhotoEditorSettingsList
@@ -16,7 +14,6 @@ import ly.img.android.pesdk.backend.model.state.LoadSettings
 import ly.img.android.pesdk.backend.model.state.manager.SettingsList
 import ly.img.android.pesdk.kotlin_extension.continueWithExceptions
 import ly.img.android.pesdk.ui.activity.PhotoEditorBuilder
-import ly.img.android.pesdk.ui.utils.PermissionRequest
 import ly.img.android.pesdk.utils.MainThreadRunnable
 import ly.img.android.pesdk.utils.SequenceRunnable
 import ly.img.android.pesdk.utils.UriHelper
@@ -29,8 +26,9 @@ import ly.img.android.pesdk.backend.encoder.Encoder
 import ly.img.android.pesdk.backend.model.EditorSDKResult
 import ly.img.android.serializer._3.IMGLYFileReader
 import ly.img.android.serializer._3.IMGLYFileWriter
+import java.util.UUID
 
-class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), ActivityEventListener, PermissionListener {
+class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), ActivityEventListener {
 
     companion object {
         // This number must be unique. It is public to allow client code to change it if the same value is used elsewhere.
@@ -81,9 +79,9 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                                         }
                                         when (serializationConfig.exportType) {
                                             SerializationExportType.FILE_URL -> {
-                                                val uri = serializationConfig.filename?.let { 
-                                                    Uri.parse(it)
-                                                } ?: Uri.fromFile(File.createTempFile("serialization", ".json"))
+                                                val uri = serializationConfig.filename?.let {
+                                                    Uri.parse("$it.json")
+                                                } ?: Uri.fromFile(File.createTempFile("serialization-" + UUID.randomUUID().toString(), ".json"))
                                                 Encoder.createOutputStream(uri).use { outputStream -> 
                                                     IMGLYFileWriter(settingsList).writeJson(outputStream)
                                                 }
@@ -160,26 +158,7 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
 
         readSerialisation(settingsList, serialization, image == null)
 
-        if (checkPermissions()) {
-            startEditor(settingsList)
-        }
-    }
-
-    private fun checkPermissions(): Boolean {
-        (currentActivity as? PermissionAwareActivity)?.also {
-            var haveAllPermissions = true
-            for (permission in PermissionRequest.NEEDED_EDITOR_PERMISSIONS) {
-                if (it.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                    haveAllPermissions = false
-                }
-            }
-            if (!haveAllPermissions) {
-                it.requestPermissions(PermissionRequest.NEEDED_EDITOR_PERMISSIONS, 0, this)
-                return false
-            }
-        }
-
-        return true
+        startEditor(settingsList)
     }
 
     private fun readSerialisation(settingsList: SettingsList, serialization: String?, readImage: Boolean) {
@@ -195,13 +174,6 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
     private fun startEditor(settingsList: PhotoEditorSettingsList?) {
         val currentActivity = this.currentActivity ?: throw RuntimeException("Can't start the Editor because there is no current activity")
         if (settingsList != null) {
-            (currentActivity as? PermissionAwareActivity)?.also {
-                for (permission in PermissionRequest.NEEDED_EDITOR_PERMISSIONS) {
-                    if (it.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
-                        return
-                    }
-                }
-            }
             MainThreadRunnable {
                 PhotoEditorBuilder(currentActivity)
                   .setSettingsList(settingsList)
@@ -309,11 +281,5 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
     }
 
     override fun getName() = "RNPhotoEditorSDK"
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>?, grantResults: IntArray): Boolean {
-        PermissionRequest.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        startEditor(currentSettingsList)
-        return false
-    }
 
 }
