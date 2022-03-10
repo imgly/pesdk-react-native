@@ -29,6 +29,13 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
   [self dismiss:self.mediaEditViewController animated:NO completion:NULL];
 }
 
+[PESDK setBundleImageBlock:^UIImage * _Nullable(NSString * _Nonnull imageName) {
+  if ([imageName isEqualToString:@"imgly_icon_save"]) {
+    return [UIImage imageNamed:@"imgly_approve_44pt"];
+  }
+  return nil;
+}];
+
 - (void)present:(nonnull IMGLYMediaEditViewControllerBlock)createMediaEditViewController withUTI:(nonnull IMGLYUTIBlock)getUTI
   configuration:(nullable NSDictionary *)dictionary serialization:(nullable NSDictionary *)state
         resolve:(nonnull RCTPromiseResolveBlock)resolve reject:(nonnull RCTPromiseRejectBlock)reject
@@ -60,14 +67,6 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
       @"pesdk_transform_asset_square": @"正方形"
     }
   }];
-  
-  [PESDK setBundleImageBlock:^UIImage * _Nullable(NSString * _Nonnull imageName) {
-    if ([imageName isEqualToString:@"imgly_icon_save"]) {
-      return [UIImage imageNamed:@"imgly_approve_44pt"];
-    }
-    return nil;
-  }];
-
 
   __block NSError *error = nil;
   NSData *serializationData = nil;
