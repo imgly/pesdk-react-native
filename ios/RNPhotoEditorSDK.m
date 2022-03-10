@@ -36,7 +36,7 @@ static RNPESDKWillPresentBlock _willPresentPhotoEditViewController = nil;
         resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
 {
 
-  PESDKPhoto setLocalizationDictionary: @{
+  PESDKPhoto.localizationDictionary = @{
     @"ja": @{
       @"pesdk_transform_title_name": @"変換",
       @"pesdk_adjustments_title_name": @"調整",
