@@ -36,13 +36,13 @@ static RNPESDKWillPresentBlock _willPresentPhotoEditViewController = nil;
         resolve:(RCTPromiseResolveBlock)resolve reject:(RCTPromiseRejectBlock)reject
 {
 
-  [PESDKPhoto setLocalizationDictionary: @{
+  PESDKPhoto setLocalizationDictionary: @{
     @"ja": @{
       @"pesdk_transform_title_name": @"変換",
       @"pesdk_adjustments_title_name": @"調整",
       @"pesdk_adjustments_button_reset": @"取り消し"
     }
-  }];
+  };
 
   [self present:^PESDKMediaEditViewController * _Nullable(PESDKConfiguration * _Nonnull configuration, NSData * _Nullable serializationData) {
 
