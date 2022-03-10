@@ -63,7 +63,7 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
   
   [PESDK setBundleImageBlock:^UIImage * _Nullable(NSString * _Nonnull imageName) {
     if ([imageName isEqualToString:@"imgly_icon_save"]) {
-      return [UIImage imageNamed:@"imgly_icon_approve"];
+      return [UIImage imageNamed:@"imgly_icon_swap"];
     }
     return nil;
   }];
