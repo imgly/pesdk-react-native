@@ -52,6 +52,17 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
   }
 #endif
 
+  PESDKConfiguration *configuration = [[PESDKConfiguration alloc] initWithBuilder:^(PESDKConfigurationBuilder * _Nonnull builder) {
+    builder.localizationDictionary = @{
+      @"ja": @{
+        @"pesdk_transform_title_name": @"変換",
+        @"pesdk_adjustments_title_name": @"調整",
+        @"pesdk_adjustments_button_reset": @"取り消し"
+      }
+    };
+    [builder configureFromDictionary:dictionary error:&error];
+  }];
+
   __block NSError *error = nil;
   NSData *serializationData = nil;
   if (state != nil) {
