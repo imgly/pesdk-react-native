@@ -56,8 +56,9 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
     @"ja": @{
       @"pesdk_transform_title_name": @"調整",
       @"pesdk_transform_button_reset": @"リセット",
-      @"pesdk_transform_button_custom": @"カスタム",
-      @"pesdk_transform_button_square": @"正方形",
+      @"pesdk_transform_asset_freeCrop": @"カスタム",
+      @"pesdk_transform_asset_square": @"正方形",
+      @"pesdk_trim_title_name": @"長さ調整"
     }
   }];
 
