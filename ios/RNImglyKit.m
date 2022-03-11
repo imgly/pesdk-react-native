@@ -3,13 +3,6 @@
 
 #define RN_IMGLY_DEBUG 0
 
-[PESDK setBundleImageBlock:^UIImage * _Nullable(NSString * _Nonnull imageName) {
-  if ([imageName isEqualToString:@"imgly_icon_save"]) {
-    return [UIImage imageNamed:@"imgly_icon_approve_44pt"];
-  }
-  return nil;
-}];
-
 @implementation RN_IMGLY_ImglyKit
 
 static IMGLYConfigurationBlock _configureWithBuilder = nil;
@@ -134,6 +127,14 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
         configureWithBuilder(builder);
       }
     }];
+
+    [PESDK setBundleImageBlock:^UIImage * _Nullable(NSString * _Nonnull imageName) {
+      if ([imageName isEqualToString:@"imgly_icon_save"]) {
+        return [UIImage imageNamed:@"imgly_icon_approve_44pt"];
+      }
+      return nil;
+    }];
+
     if (error != nil) {
       RCTLogError(@"Error while updating configuration: %@", error);
       reject(RN_IMGLY.kErrorUnableToLoad, [NSString RN_IMGLY_string:@"Unable to update configuration." withError:error], error);
