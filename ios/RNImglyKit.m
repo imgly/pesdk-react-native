@@ -3,6 +3,13 @@
 
 #define RN_IMGLY_DEBUG 0
 
+[PESDK setBundleImageBlock:^UIImage * _Nullable(NSString * _Nonnull imageName) {
+  if ([imageName isEqualToString:@"imgly_icon_save"]) {
+    return [UIImage imageNamed:@"imgly_icon_approve_44pt"];
+  }
+  return nil;
+}];
+
 @implementation RN_IMGLY_ImglyKit
 
 static IMGLYConfigurationBlock _configureWithBuilder = nil;
@@ -59,13 +66,6 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
       @"pesdk_transform_asset_freeCrop": @"カスタム",
       @"pesdk_transform_asset_square": @"正方形"
     }
-  }];
-
-  [PESDK setBundleImageBlock:^UIImage * _Nullable(NSString * _Nonnull imageName) {
-    if ([imageName isEqualToString:@"imgly_icon_save"]) {
-      return [UIImage imageNamed:@"imgly_icon_approve_44pt"];
-    }
-    return nil;
   }];
 
   __block NSError *error = nil;
