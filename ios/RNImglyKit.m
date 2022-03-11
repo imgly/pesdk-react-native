@@ -60,10 +60,10 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
       @"pesdk_transform_asset_square": @"正方形"
     }
   }];
-  
+
   [PESDK setBundleImageBlock:^UIImage * _Nullable(NSString * _Nonnull imageName) {
     if ([imageName isEqualToString:@"imgly_icon_save"]) {
-      return [UIImage imageNamed:@"imgly_icon_swap"];
+      return [UIImage imageNamed:@"imgly_icon_approve_44pt"];
     }
     return nil;
   }];
