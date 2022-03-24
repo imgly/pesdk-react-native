@@ -52,15 +52,35 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
   }
 #endif
 
+  //@"pesdk_adjustments_title_name": @"Adjust",
+  //@"pesdk_adjustments_button_reset": @"リセット",
+  //@"pesdk_adjustments_button_brightnessTool": @"Brightness",
+  //@"pesdk_adjustments_button_contrastTool": @"Contrast",
+  //@"pesdk_adjustments_button_saturationTool": @"Saturation",
+  //@"pesdk_adjustments_button_clarityTool": @"Clarity",
+  //@"pesdk_adjustments_button_shadowsTool": @"Shadows",
+  //@"pesdk_adjustments_button_highlightsTool": @"Highlights",
+  //@"pesdk_adjustments_button_exposureTool": @"Exposure",
+  //@"pesdk_adjustments_button_gammaTool": @"Gamma",
+  //@"pesdk_adjustments_button_blacksTool": @"Blacks",
+  //@"pesdk_adjustments_button_whitesTool": @"Whites",
+  //@"pesdk_adjustments_button_temperatureTool": @"Temperature",
+  //@"pesdk_adjustments_button_sharpnessTool": @"Sharpness",
+
   [PESDK setLocalizationDictionary: @{
     @"ja": @{
       @"pesdk_editor_title_name": @"編集",
+      @"pesdk_editor_title_savingImageSpinner": @"書き出し中",
+      @"pesdk_common_button_cancel": @"キャンセル",
+
       @"pesdk_transform_title_name": @"切り抜き",
       @"pesdk_transform_button_reset": @"リセット",
       @"pesdk_transform_asset_freeCrop": @"カスタム",
       @"pesdk_transform_asset_square": @"正方形",
-      @"pesdk_editor_title_savingImageSpinner": @"書き出し中",
-      @"pesdk_common_button_cancel": @"キャンセル"
+
+      @"pesdk_editor_title_discardChangesAlert": @"変更を破棄しますか？",
+      @"pesdk_editor_text_discardChangesAlert": @"このまま戻ると、編集内容は破棄されます。",
+      @"pesdk_editor_button_discardChanges": @"破棄"
     }
   }];
 
