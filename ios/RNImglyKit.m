@@ -80,7 +80,7 @@ const struct RN_IMGLY_Constants RN_IMGLY = {
 
       @"pesdk_editor_title_discardChangesAlert": @"変更を破棄しますか？",
       @"pesdk_editor_text_discardChangesAlert": @"このまま戻ると、編集内容は破棄されます。",
-      @"pesdk_editor_button_discardChanges": @"破棄"
+      @"pesdk_editor_button_discardChanges": @"破棄",
     }
   }];
 
