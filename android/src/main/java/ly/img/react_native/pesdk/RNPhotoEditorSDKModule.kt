@@ -68,14 +68,15 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
 
                             val serializationConfig = currentConfig?.export?.serialization
 
-                            val serialization: Any? = if (serializationConfig?.enabled == true) {
+                            var serialization: Any? = null
+                            if (serializationConfig?.enabled == true) {
                                 val settingsList = data.settingsList
                                 skipIfNotExists {
                                     settingsList.let { settingsList ->
                                         if (serializationConfig.embedSourceImage == true) {
                                             Log.i("ImgLySdk", "EmbedSourceImage is currently not supported by the Android SDK")
                                         }
-                                        when (serializationConfig.exportType) {
+                                        serialization = when (serializationConfig.exportType) {
                                             SerializationExportType.FILE_URL -> {
                                                 val uri = serializationConfig.filename?.let {
                                                     Uri.parse("$it.json")
@@ -94,13 +95,10 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                                             }
                                         }
                                     }
+                                    settingsList.release()
                                 } ?: run {
                                     Log.i("ImgLySdk", "You need to include 'backend:serializer' Module, to use serialisation!")
-                                    null
                                 }
-                                settingsList.release()
-                            } else {
-                                null
                             }
 
                             currentPromise?.resolve(
