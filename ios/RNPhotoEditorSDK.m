@@ -123,7 +123,7 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
     PESDKPhoto *photo = [[PESDKPhoto alloc] initWithURL:request.URL];
     [self present:photo withConfiguration:configuration andSerialization:state resolve:resolve reject:reject];
   } else {
-    [self.bridge.imageLoader loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
+    [[self.bridge moduleForName:@"ImageLoader" lazilyLoadIfNecessary:YES] loadImageWithURLRequest:request callback:^(NSError * _Nullable error, UIImage * _Nullable image) {
       if (error) {
         reject(RN_IMGLY.kErrorUnableToLoad, [NSString RN_IMGLY_string:@"Unable to load image." withError:error], error);
         return;

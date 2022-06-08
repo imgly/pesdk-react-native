@@ -133,7 +133,7 @@ class PESDK {
    * restores a previous state of the editor by re-applying all modifications to the loaded
    * image.
    *
-   * @return {Promise<PhotoEditorResult>} Returns a `PhotoEditorResult` or `null` if the editor
+   * @return {Promise<PhotoEditorResult | null>} Returns a `PhotoEditorResult` or `null` if the editor
    * is dismissed without exporting the edited image.
    */
   static openEditor(image = null, configuration = null, serialization = null) {
