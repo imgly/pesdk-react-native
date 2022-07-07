@@ -2,7 +2,6 @@ package ly.img.react_native.pesdk
 
 import android.app.Activity
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
 import com.facebook.react.bridge.*
@@ -40,7 +39,6 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
 
     }
 
-    private var currentSettingsList: PhotoEditorSettingsList? = null
     private var currentPromise: Promise? = null
     private var currentConfig: Configuration? = null
 
@@ -69,15 +67,16 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                             val resultPath = data.resultUri
 
                             val serializationConfig = currentConfig?.export?.serialization
-                            val settingsList = data.settingsList
 
-                            val serialization: Any? = if (serializationConfig?.enabled == true) {
+                            var serialization: Any? = null
+                            if (serializationConfig?.enabled == true) {
+                                val settingsList = data.settingsList
                                 skipIfNotExists {
                                     settingsList.let { settingsList ->
                                         if (serializationConfig.embedSourceImage == true) {
                                             Log.i("ImgLySdk", "EmbedSourceImage is currently not supported by the Android SDK")
                                         }
-                                        when (serializationConfig.exportType) {
+                                        serialization = when (serializationConfig.exportType) {
                                             SerializationExportType.FILE_URL -> {
                                                 val uri = serializationConfig.filename?.let {
                                                     Uri.parse("$it.json")
@@ -96,12 +95,10 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                                             }
                                         }
                                     }
+                                    settingsList.release()
                                 } ?: run {
                                     Log.i("ImgLySdk", "You need to include 'backend:serializer' Module, to use serialisation!")
-                                    null
                                 }
-                            } else {
-                                null
                             }
 
                             currentPromise?.resolve(
@@ -133,12 +130,10 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
     fun present(image: String?, config: ReadableMap?, serialization: String?, promise: Promise) {
         IMGLY.authorize()
 
-        val settingsList = PhotoEditorSettingsList()
-
-        currentSettingsList = settingsList
-        currentConfig = ConfigLoader.readFrom(config?.toHashMap() ?: mapOf()).also {
-            it.applyOn(settingsList)
-        }
+        val configuration = ConfigLoader.readFrom(config?.toHashMap() ?: mapOf())
+        val settingsList = PhotoEditorSettingsList(configuration.export?.serialization?.enabled == true)
+        configuration.applyOn(settingsList)
+        currentConfig = configuration
         currentPromise = promise
 
         settingsList.configure<LoadSettings> { loadSettings ->
@@ -178,6 +173,7 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                 PhotoEditorBuilder(currentActivity)
                   .setSettingsList(settingsList)
                   .startActivityForResult(currentActivity, EDITOR_RESULT_ID)
+                settingsList.release()
             }()
         }
     }

@@ -30,6 +30,13 @@ static RNPESDKWillPresentBlock _willPresentPhotoEditViewController = nil;
   _willPresentPhotoEditViewController = willPresentBlock;
 }
 
+- (void)handleError:(nonnull PESDKPhotoEditViewController *)photoEditViewController code:(nullable NSString *)code message:(nullable NSString *)message error:(nullable NSError *)error {
+  RCTPromiseRejectBlock reject = self.reject;
+  [self dismiss:photoEditViewController animated:YES completion:^{
+    reject(code, message, error);
+  }];
+}
+
 @synthesize bridge = _bridge;
 
 - (void)present:(nullable PESDKPhoto *)photo withConfiguration:(nullable NSDictionary *)dictionary andSerialization:(nullable NSDictionary *)state
@@ -122,7 +129,7 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
     PESDKPhoto *photo = [[PESDKPhoto alloc] initWithURL:request.URL];
     [self present:photo withConfiguration:configuration andSerialization:state resolve:resolve reject:reject];
   } else {
-    [self.bridge.imageLoader loadImageWithURLRequest:request callback:^(NSError *error, UIImage *image) {
+    [[self.bridge moduleForName:@"ImageLoader" lazilyLoadIfNecessary:YES] loadImageWithURLRequest:request callback:^(NSError * _Nullable error, UIImage * _Nullable image) {
       if (error) {
         reject(RN_IMGLY.kErrorUnableToLoad, [NSString RN_IMGLY_string:@"Unable to load image." withError:error], error);
         return;
@@ -139,23 +146,15 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
 
 #pragma mark - PESDKPhotoEditViewControllerDelegate
 
-- (void)photoEditViewController:(nonnull PESDKPhotoEditViewController *)photoEditViewController didSaveImage:(nonnull UIImage *)uiImage imageAsData:(nonnull NSData *)imageData {
-  PESDKPhotoEditViewControllerOptions *photoEditViewControllerOptions = photoEditViewController.configuration.photoEditViewControllerOptions;
+- (void)photoEditViewControllerDidFinish:(nonnull PESDKPhotoEditViewController *)photoEditViewController result:(nonnull PESDKPhotoEditorResult *)result {
+  NSString *uti = result.output.uti;
 
-  if (imageData.length == 0) {
-    // Export image without any changes to target format if possible.
-    switch (photoEditViewControllerOptions.outputImageFileFormat) {
-      case PESDKImageFileFormatPng:
-        imageData = UIImagePNGRepresentation(uiImage);
-        break;
-      case PESDKImageFileFormatJpeg:
-        imageData = UIImageJPEGRepresentation(uiImage, photoEditViewControllerOptions.compressionQuality);
-        break;
-      default:
-        break;
-    }
+  if (uti == nil) {
+    [self handleError:photoEditViewController code:RN_IMGLY.kErrorUnableToExport message:@"Image could not be saved." error:nil];
+    return;
   }
 
+  NSData *imageData = result.output.data;
   NSError *error = nil;
   NSString *image = nil;
   id serialization = nil;
@@ -166,7 +165,7 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
         image = self.exportFile.absoluteString;
       }
     } else if ([self.exportType isEqualToString:RN_IMGLY.kExportTypeDataURL]) {
-      NSString *mediaType = CFBridgingRelease(UTTypeCopyPreferredTagWithClass(photoEditViewControllerOptions.outputImageFileFormatUTI, kUTTagClassMIMEType));
+      NSString *mediaType = CFBridgingRelease(UTTypeCopyPreferredTagWithClass((__bridge CFStringRef)uti, kUTTagClassMIMEType));
       image = [NSString stringWithFormat:@"data:%@;base64,%@", mediaType, [imageData base64EncodedStringWithOptions: 0]];
     }
   }
@@ -183,17 +182,16 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
     }
   }
 
-  RCTPromiseResolveBlock resolve = self.resolve;
-  RCTPromiseRejectBlock reject = self.reject;
-  [self dismiss:photoEditViewController animated:YES completion:^{
-    if (error == nil) {
+  if (error == nil) {
+    RCTPromiseResolveBlock resolve = self.resolve;
+    [self dismiss:photoEditViewController animated:YES completion:^{
       resolve(@{ @"image": (image != nil) ? image : [NSNull null],
-                 @"hasChanges": @(photoEditViewController.hasChanges),
+                 @"hasChanges": @(result.status == PESDKPhotoEditorStatusRenderedWithChanges),
                  @"serialization": (serialization != nil) ? serialization : [NSNull null] });
-    } else {
-      reject(RN_IMGLY.kErrorUnableToExport, [NSString RN_IMGLY_string:@"Unable to export image or serialization." withError:error], error);
-    }
-  }];
+    }];
+  } else {
+    [self handleError:photoEditViewController code:RN_IMGLY.kErrorUnableToExport message:[NSString RN_IMGLY_string:@"Unable to export image or serialization." withError:error] error:error];
+  }
 }
 
 - (void)photoEditViewControllerDidCancel:(nonnull PESDKPhotoEditViewController *)photoEditViewController {
@@ -203,11 +201,8 @@ RCT_EXPORT_METHOD(present:(nullable NSURLRequest *)request
   }];
 }
 
-- (void)photoEditViewControllerDidFailToGeneratePhoto:(nonnull PESDKPhotoEditViewController *)photoEditViewController {
-  RCTPromiseRejectBlock reject = self.reject;
-  [self dismiss:photoEditViewController animated:YES completion:^{
-    reject(RN_IMGLY.kErrorUnableToExport, @"Unable to generate image", nil);
-  }];
+- (void)photoEditViewControllerDidFail:(nonnull PESDKPhotoEditViewController *)photoEditViewController error:(PESDKPhotoEditorError *)error {
+  [self handleError:photoEditViewController code:RN_IMGLY.kErrorUnableToExport message:@"Unable to generate image" error:error];
 }
 
 @end
