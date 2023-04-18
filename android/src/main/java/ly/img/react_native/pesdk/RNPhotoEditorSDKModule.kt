@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
+import androidx.annotation.WorkerThread
 import com.facebook.react.bridge.*
 import ly.img.android.IMGLY
 import ly.img.android.PESDK
@@ -23,6 +24,8 @@ import org.json.JSONObject
 import java.io.File
 import ly.img.android.pesdk.backend.encoder.Encoder
 import ly.img.android.pesdk.backend.model.EditorSDKResult
+import ly.img.android.pesdk.backend.model.state.manager.StateHandler
+import ly.img.android.pesdk.ui.activity.PhotoEditorActivity
 import ly.img.android.serializer._3.IMGLYFileReader
 import ly.img.android.serializer._3.IMGLYFileWriter
 import java.util.UUID
@@ -31,12 +34,17 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
 
     companion object {
         // This number must be unique. It is public to allow client code to change it if the same value is used elsewhere.
-        var EDITOR_RESULT_ID = 29064
+        @JvmField var EDITOR_RESULT_ID = 29064
+
+        /** A closure to modify a *PhotoEditorSettingsList* before the editor is opened. */
+        @JvmField var editorWillOpenClosure: ((settingsList: PhotoEditorSettingsList) -> Unit)? = null
+
+        /** A closure allowing access to the *StateHandler* before the editor is exporting. */
+        @JvmField var editorWillExportClosure: ((stateHandler: StateHandler) -> Unit)? = null
     }
 
     init {
         reactContext.addActivityEventListener(this)
-
     }
 
     private var currentPromise: Promise? = null
@@ -50,9 +58,9 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
 
     override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, intent: Intent?) {
         val data = try {
-          intent?.let { EditorSDKResult(it) }
+            intent?.let { EditorSDKResult(it) }
         } catch (e: EditorSDKResult.NotAnImglyResultException) {
-          null
+            null
         } ?: return // If data is null the result is not from us.
 
         when (requestCode) {
@@ -81,16 +89,16 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                                                 val uri = serializationConfig.filename?.let {
                                                     Uri.parse("$it.json")
                                                 } ?: Uri.fromFile(File.createTempFile("serialization-" + UUID.randomUUID().toString(), ".json"))
-                                                Encoder.createOutputStream(uri).use { outputStream -> 
+                                                Encoder.createOutputStream(uri).use { outputStream ->
                                                     IMGLYFileWriter(settingsList).writeJson(outputStream)
                                                 }
                                                 uri.toString()
                                             }
                                             SerializationExportType.OBJECT -> {
                                                 ReactJSON.convertJsonToMap(
-                                                  JSONObject(
-                                                          IMGLYFileWriter(settingsList).writeJsonAsString()
-                                                  )
+                                                    JSONObject(
+                                                        IMGLYFileWriter(settingsList).writeJsonAsString()
+                                                    )
                                                 )
                                             }
                                         }
@@ -102,18 +110,18 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                             }
 
                             currentPromise?.resolve(
-                              reactMap(
-                                "image" to when (currentConfig?.export?.image?.exportType) {
-                                    ImageExportType.DATA_URL -> resultPath?.let {
-                                        val imageSource = ImageSource.create(it)
-                                        "data:${imageSource.imageFormat.mimeType};base64,${imageSource.asBase64}"
-                                    }
-                                    ImageExportType.FILE_URL -> resultPath?.toString()
-                                    else -> resultPath?.toString()
-                                },
-                                "hasChanges" to (sourcePath?.path != resultPath?.path),
-                                "serialization" to serialization
-                              )
+                                reactMap(
+                                    "image" to when (currentConfig?.export?.image?.exportType) {
+                                        ImageExportType.DATA_URL -> resultPath?.let {
+                                            val imageSource = ImageSource.create(it)
+                                            "data:${imageSource.imageFormat.mimeType};base64,${imageSource.asBase64}"
+                                        }
+                                        ImageExportType.FILE_URL -> resultPath?.toString()
+                                        else -> resultPath?.toString()
+                                    },
+                                    "hasChanges" to (sourcePath?.path != resultPath?.path),
+                                    "serialization" to serialization
+                                )
                             )
                         }()
                     }
@@ -156,7 +164,9 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
         startEditor(settingsList)
     }
 
-    private fun readSerialisation(settingsList: SettingsList, serialization: String?, readImage: Boolean) {
+    private fun readSerialisation(settingsList: PhotoEditorSettingsList, serialization: String?, readImage: Boolean) {
+        editorWillOpenClosure?.invoke(settingsList)
+
         if (serialization != null) {
             skipIfNotExists {
                 IMGLYFileReader(settingsList).also {
@@ -170,9 +180,9 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
         val currentActivity = this.currentActivity ?: throw RuntimeException("Can't start the Editor because there is no current activity")
         if (settingsList != null) {
             MainThreadRunnable {
-                PhotoEditorBuilder(currentActivity)
-                  .setSettingsList(settingsList)
-                  .startActivityForResult(currentActivity, EDITOR_RESULT_ID)
+                PhotoEditorBuilder(currentActivity, RNPhotoEditorSDKActivity::class.java)
+                    .setSettingsList(settingsList)
+                    .startActivityForResult(currentActivity, EDITOR_RESULT_ID)
                 settingsList.release()
             }()
         }
@@ -277,5 +287,14 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
     }
 
     override fun getName() = "RNPhotoEditorSDK"
+}
 
+/** A *PhotoEditorActivity* used for the native interfaces. */
+class RNPhotoEditorSDKActivity: PhotoEditorActivity() {
+    @WorkerThread
+    override fun onExportStart(stateHandler: StateHandler) {
+        RNPhotoEditorSDKModule.editorWillExportClosure?.invoke(stateHandler)
+
+        super.onExportStart(stateHandler)
+    }
 }
