@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { NativeModules, Image, Platform } from 'react-native';
+import { Image, NativeModules, Platform } from 'react-native';
 import { Configuration } from './configuration';
 
 const { RNPhotoEditorSDK } = NativeModules;
@@ -158,9 +158,9 @@ class PESDK {
    */
   static unlockWithLicense(license) {
     if (Platform.OS == 'android') {
-      RNPhotoEditorSDK.unlockWithLicense(JSON.stringify(license));
+      return RNPhotoEditorSDK.unlockWithLicense(JSON.stringify(license));
     } else {
-      RNPhotoEditorSDK.unlockWithLicense(license);
+      return RNPhotoEditorSDK.unlockWithLicense(license);
     }
   }
 }
@@ -196,5 +196,6 @@ class PhotoEditorModal extends Component {
   }
 }
 
-export { PESDK, PhotoEditorModal };
 export * from './configuration';
+export { PESDK, PhotoEditorModal };
+

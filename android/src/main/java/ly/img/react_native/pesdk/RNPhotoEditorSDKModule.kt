@@ -6,6 +6,7 @@ import android.net.Uri
 import android.util.Log
 import androidx.annotation.WorkerThread
 import com.facebook.react.bridge.*
+import ly.img.android.AuthorizationException
 import ly.img.android.IMGLY
 import ly.img.android.PESDK
 import ly.img.android.pesdk.PhotoEditorSettingsList
@@ -47,13 +48,23 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
         reactContext.addActivityEventListener(this)
     }
 
+    /** IMGLY constants for the plugin use. */
+    object IMGLYConstants {
+        const val K_ERROR_UNABLE_TO_UNLOCK = "E_UNABLE_TO_UNLOCK"
+    }
+
     private var currentPromise: Promise? = null
     private var currentConfig: Configuration? = null
 
     @ReactMethod
-    fun unlockWithLicense(license: String) {
-        PESDK.initSDKWithLicenseData(license)
-        IMGLY.authorize()
+    fun unlockWithLicense(license: String, promise: Promise) {
+        try {
+            PESDK.initSDKWithLicenseData(license)
+            IMGLY.authorize()
+            promise.resolve(null)
+        } catch (e: AuthorizationException) {
+            promise.reject(IMGLYConstants.K_ERROR_UNABLE_TO_UNLOCK, "Unlocking the SDK failed due to: ${e.message}.")
+        }
     }
 
     override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, intent: Intent?) {

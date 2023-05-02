@@ -1,5 +1,5 @@
-import { Component } from 'react';
-import { Configuration } from './configuration';
+import { Component } from "react";
+import { Configuration } from "./configuration";
 
 /**
  * The result of an export.
@@ -33,10 +33,10 @@ declare class PESDK {
    * is dismissed without exporting the edited image.
    */
   static openEditor(
-    image: string | {uri: string} | number,
+    image: string | { uri: string } | number,
     configuration?: Configuration,
     serialization?: object
-  ): Promise<PhotoEditorResult | null>
+  ): Promise<PhotoEditorResult | null>;
 
   /**
    * Unlock PhotoEditor SDK with a license.
@@ -48,9 +48,7 @@ declare class PESDK {
    * and `pesdk_license.android.json` for the Android license file in order to get automatically
    * resolved by the packager.
    */
-  static unlockWithLicense(
-    license: string | object
-  ): void
+  static unlockWithLicense(license: string | object): Promise<void>;
 }
 
 /**
@@ -74,7 +72,7 @@ interface PhotoEditorModalProps {
    * @note EXIF meta data is only preserved in the edited image if and only if the source
    * image is loaded from a local `file://` resource.
    */
-  image?: string | {uri: string} | number;
+  image?: string | { uri: string } | number;
 
   /**
    * This prop determines the configuration used to initialize the editor.
@@ -118,7 +116,11 @@ interface PhotoEditorModalState {
 /**
  * A component that wraps the `PESDK.openEditor` function to modally present a photo editor.
  */
-declare class PhotoEditorModal extends Component<PhotoEditorModalProps, PhotoEditorModalState> {}
+declare class PhotoEditorModal extends Component<
+  PhotoEditorModalProps,
+  PhotoEditorModalState
+> {}
 
+export * from "./configuration";
 export { PESDK, PhotoEditorModal };
-export * from './configuration';
+
