@@ -1,7 +1,7 @@
 #import <React/RCTBridgeModule.h>
 #import "RNImglyKit.h"
 
-@import PhotoEditorSDK;
+#import <ImglyKit/ImglyKit-Swift.h>
 
 /// The React Native module for PhotoEditor SDK
 @interface RNPhotoEditorSDK : RNPESDKImglyKit <RCTBridgeModule>
