@@ -122,5 +122,5 @@ declare class PhotoEditorModal extends Component<
 > {}
 
 export * from "./configuration";
-export { PESDK, PhotoEditorModal };
+export { PESDK, PhotoEditorModal, PhotoEditorResult };
 
