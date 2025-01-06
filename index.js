@@ -157,11 +157,7 @@ class PESDK {
    * resolved by the packager.
    */
   static unlockWithLicense(license) {
-    if (Platform.OS == 'android') {
-      return RNPhotoEditorSDK.unlockWithLicense(JSON.stringify(license));
-    } else {
-      return RNPhotoEditorSDK.unlockWithLicense(license);
-    }
+    return RNPhotoEditorSDK.unlockWithLicense(JSON.stringify(license));
   }
 }
 
