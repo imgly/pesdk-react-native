@@ -142,14 +142,16 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
     }
 
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
     }
 
     @ReactMethod
     fun present(image: String?, config: ReadableMap?, serialization: String?, promise: Promise) {
         IMGLY.authorize()
 
-        val configuration = ConfigLoader.readFrom(config?.toHashMap() ?: mapOf())
+        val rawConfig: Map<String, Any?> = config?.toHashMap() ?: emptyMap()
+        val cleanConfig: Map<String, Any> = rawConfig.filterValues { it != null }.mapValues { it.value as Any }
+        val configuration = ConfigLoader.readFrom(cleanConfig)
         val settingsList = PhotoEditorSettingsList(configuration.export?.serialization?.enabled == true)
         configuration.applyOn(settingsList)
         currentConfig = configuration
