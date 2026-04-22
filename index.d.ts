@@ -1,6 +1,14 @@
 import { Component } from "react";
 import { Configuration } from "./configuration";
 
+/** An object that contains width and height values. */
+interface Size {
+  /** A width value. */
+  width: number;
+  /** A height value. */
+  height: number;
+}
+
 /**
  * The result of an export.
  */
@@ -11,6 +19,8 @@ interface PhotoEditorResult {
   hasChanges: boolean;
   /** All modifications applied to the input image if `export.serialization.enabled` of the `Configuration` was set to `true`. */
   serialization?: string | object;
+  /** The size of the **transformed** image after cropping. */
+  imageSize?: Size;
 }
 
 declare class PESDK {

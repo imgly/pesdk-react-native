@@ -131,7 +131,12 @@ class RNPhotoEditorSDKModule(val reactContext: ReactApplicationContext) : ReactC
                                         else -> resultPath?.toString()
                                     },
                                     "hasChanges" to (sourcePath?.path != resultPath?.path),
-                                    "serialization" to serialization
+                                    "serialization" to serialization,
+                                    // Dimensionen bereitstellen, falls verfügbar
+                                    "imageSize" to reactMap(
+                                        "width" to data.resultWidth,
+                                        "height" to data.resultHeight
+                                    )
                                 )
                             )
                         }()
